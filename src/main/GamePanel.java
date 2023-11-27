@@ -11,7 +11,7 @@ import java.util.Random;
 public class GamePanel extends JPanel {
     private KeyboardInputs keyboardInputs;
 
-    private int xApple =80, yApple = 80;
+    private int xApple = 480, yApple = 480;
 
     private Rectangle appleRect;
 
@@ -53,9 +53,9 @@ public class GamePanel extends JPanel {
     private void initializeTail(){
         tails = new LinkedList<>();
 
-        tails.add(new SnakeTail(160,40,"right"));
-        tails.add(new SnakeTail(120,40,"right"));
-        tails.add(new SnakeTail(80,40,"right"));
+        tails.add(new SnakeTail(120,480,"right"));
+        tails.add(new SnakeTail(80,480,"right"));
+        tails.add(new SnakeTail(40,480,"right"));
     }
 
 
@@ -63,7 +63,7 @@ public class GamePanel extends JPanel {
         random = new Random();
         if (appleRect.contains(tails.getFirst().getX(),tails.getFirst().getY())){
             while (!appleSpawn){
-                randomPosition();
+                appleSpawn = randomPosition();
             }
             appleSpawn = false;
             appleRect.setLocation(xApple,yApple);
@@ -71,15 +71,15 @@ public class GamePanel extends JPanel {
         }
     }
 
-    private void randomPosition(){
+     private boolean randomPosition(){
         xApple = random.nextInt(24) * 40;
         yApple = random.nextInt(24) * 40;
         for (SnakeTail tail : tails){
-            if (xApple != tail.getX() || yApple != tail.getY()){
-                appleSpawn = true;
-                break;
+            if (xApple == tail.getX() || yApple == tail.getY()){
+                return false;
             }
         }
+        return true;
     }
 
     private void canMove(){
@@ -138,7 +138,17 @@ public class GamePanel extends JPanel {
         int option = JOptionPane.showConfirmDialog(this,"Score: " + (tails.size()-3) + " Wanna play again ?");
 
         if (option == JOptionPane.NO_OPTION) game.getWindow().getFrame().dispatchEvent(new WindowEvent(game.getWindow().getFrame(),WindowEvent.WINDOW_CLOSING));
+        else if (option == JOptionPane.YES_OPTION) {
+            direction = "right";
+            xApple = 480;
+            yApple = 480;
+            appleSpawn = false;
 
+            initializeTail();
+            initializeHitBox();
+
+            gameOn = true;
+        }
     }
 
 
