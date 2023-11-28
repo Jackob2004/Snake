@@ -4,7 +4,9 @@ package main;
 
 public class SnakeTail {
     private int x,y;
+
     private String direction;
+
     public SnakeTail(int x, int y,String direction){
         this.x = x;
         this.y = y;

@@ -21,9 +21,8 @@ public class Game implements Runnable{
         thread.start();
     }
 
-
     @Override
-    public void run() {
+    public void run() { // Game loop
         double refreshTime = 180000000;
         long lastFrame = System.nanoTime();
         long now = System.nanoTime();

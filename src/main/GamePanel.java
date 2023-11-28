@@ -11,17 +11,19 @@ import java.util.Random;
 public class GamePanel extends JPanel {
     private KeyboardInputs keyboardInputs;
 
-    private int xApple =80, yApple = 80;
-
-    private Rectangle appleRect;
+    private Game game;
 
     private Random random;
 
+    private int xApple = 480, yApple = 480;
+
+    private LinkedList<SnakeTail> tails;
+
+    private Rectangle appleRect;
+
     private Rectangle snakeHeadRect;
-    private Game game;
 
     private String direction = "right";
-    private LinkedList<SnakeTail> tails;
 
     private boolean gameOn = true;
 
@@ -39,10 +41,17 @@ public class GamePanel extends JPanel {
         this.game = game;
     }
 
-
     private void setPanelSize() {
         Dimension dimension = new Dimension(1000,1000);
         setPreferredSize(dimension);
+    }
+
+    private void initializeTail(){ // creating snake at the start of the game
+        tails = new LinkedList<>();
+
+        tails.add(new SnakeTail(120,480,"right"));
+        tails.add(new SnakeTail(80,480,"right"));
+        tails.add(new SnakeTail(40,480,"right"));
     }
 
     private void initializeHitBox(){
@@ -50,20 +59,11 @@ public class GamePanel extends JPanel {
         snakeHeadRect = new Rectangle(tails.getFirst().getX(),tails.getFirst().getY(),40,40);
     }
 
-    private void initializeTail(){
-        tails = new LinkedList<>();
-
-        tails.add(new SnakeTail(160,40,"right"));
-        tails.add(new SnakeTail(120,40,"right"));
-        tails.add(new SnakeTail(80,40,"right"));
-    }
-
-
-    private void spawnApple(){
+    private void spawnApple(){ // spawning apple outside snake and updating hit-box location
         random = new Random();
         if (appleRect.contains(tails.getFirst().getX(),tails.getFirst().getY())){
             while (!appleSpawn){
-                randomPosition();
+                appleSpawn = randomPosition();
             }
             appleSpawn = false;
             appleRect.setLocation(xApple,yApple);
@@ -71,18 +71,18 @@ public class GamePanel extends JPanel {
         }
     }
 
-    private void randomPosition(){
+    private boolean randomPosition(){ // getting random location for apple outside snake
         xApple = random.nextInt(24) * 40;
         yApple = random.nextInt(24) * 40;
         for (SnakeTail tail : tails){
-            if (xApple != tail.getX() || yApple != tail.getY()){
-                appleSpawn = true;
-                break;
+            if (xApple == tail.getX() || yApple == tail.getY()){
+                return false;
             }
         }
+        return true;
     }
 
-    private void canMove(){
+    private void canMove(){ // checking if snake is out of map or if he touched his body
         if(tails.get(0).getX() <= -1 || tails.get(0).getX() >= 1001 || tails.get(0).getY() <= -1 || tails.get(0).getY() >= 1001){
             gameOn= false;
             endGame();
@@ -94,7 +94,6 @@ public class GamePanel extends JPanel {
                 endGame();
             }
         }
-
     }
 
     public void addTail(){
@@ -106,13 +105,19 @@ public class GamePanel extends JPanel {
         }
     }
 
+    public void changeDirection(String direction) {
+        if(tails.getFirst().getDirection().equals("right") && tails.get(1).getDirection().equals("right") && direction.equals("left")) return;
+        else if (tails.getFirst().getDirection().equals("left") && tails.get(1).getDirection().equals("left") && direction.equals("right")) return;
+        else if (tails.getFirst().getDirection().equals("up") && tails.get(1).getDirection().equals("up") && direction.equals("down")) return;
+        else if (tails.getFirst().getDirection().equals("down") && tails.get(1).getDirection().equals("down") && direction.equals("up")) return;
 
+        this.direction = direction;
+    }
 
-    public void changeDirection(String direction) { this.direction = direction; }
-    public void moveMethod(){
+    public void moveMethod(){ // updating  snake's position
 
         for (SnakeTail tail : tails) {
-            if (!tails.get(0).getDirection().equals(direction)) {
+            if (!tails.get(0).getDirection().equals(direction)) { // head position
                 tails.get(0).setDirection(direction);
             }
             switch (tail.getDirection()) {
@@ -121,30 +126,36 @@ public class GamePanel extends JPanel {
                 case "left" -> tail.setX(tail.getX() - 40);
                 case "right" -> tail.setX(tail.getX() + 40);
             }
-
         }
 
-        for (int i = tails.size()-1; i > 0; i--) {
+        for (int i = tails.size()-1; i > 0; i--) { // updating tail position one by one each iteration of game loop
             if (!tails.get(i).getDirection().equals(tails.get(i-1).getDirection())){
                 tails.get(i).setDirection(tails.get(i-1).getDirection());
             }
         }
         canMove();
         spawnApple();
-
     }
 
-    private void endGame(){
+    private void endGame(){ // window with play again option and exit option
         int option = JOptionPane.showConfirmDialog(this,"Score: " + (tails.size()-3) + " Wanna play again ?");
 
         if (option == JOptionPane.NO_OPTION) game.getWindow().getFrame().dispatchEvent(new WindowEvent(game.getWindow().getFrame(),WindowEvent.WINDOW_CLOSING));
+        else if (option == JOptionPane.YES_OPTION) {
+            direction = "right";
+            xApple = 480;
+            yApple = 480;
+            appleSpawn = false;
 
+            initializeTail();
+            initializeHitBox();
+
+            gameOn = true;
+        }
     }
 
-
-
     @Override
-    public void paintComponent(Graphics g){
+    public void paintComponent(Graphics g){ // painting snake and apple
         super.paintComponent(g);
 
         g.setColor(new Color(16, 48, 239));
@@ -156,9 +167,7 @@ public class GamePanel extends JPanel {
         g.fillRect(xApple, yApple, 40, 40);
     }
 
-    public boolean isGameOn() {
-        return gameOn;
-    }
+    public boolean isGameOn() { return gameOn; }
 }
 
 

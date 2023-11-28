@@ -15,13 +15,13 @@ public class KeyboardInputs implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_Q) gamePanel.addTail();
+
         switch (e.getKeyCode()){
             case KeyEvent.VK_A -> gamePanel.changeDirection("left");
             case KeyEvent.VK_D -> gamePanel.changeDirection("right");
             case KeyEvent.VK_W -> gamePanel.changeDirection("up");
             case KeyEvent.VK_S -> gamePanel.changeDirection("down");
         }
-
     }
 
     @Override
